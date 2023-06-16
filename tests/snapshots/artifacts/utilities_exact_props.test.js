@@ -50,7 +50,7 @@ describe("Exact Props", () => {
         });
         function test3(a) {
             if (typeof a !== "object")
-                throw new Error("Expected a to be { a: string; b: ExactProps<{ c: number; }, false>; }.");
+                throw new Error("Expected a to be { a: string; b: ExactProps<{ c: number; }>; }.");
             if (typeof a["a"] !== "string")
                 throw new Error("Expected a.a to be string.");
             if (typeof a["b"] !== "object")

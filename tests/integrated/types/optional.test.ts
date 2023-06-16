@@ -2,7 +2,7 @@ import type { Assert } from "../../../dist/index";
 import { call } from "../../utils";
 import { expect } from "chai";
 
-describe("Optional / nullable parameters", () => {
+describe("Optional parameters", () => {
     function test(c: Assert<number>, a?: Assert<string>, b?: Assert<[string, string, number?]>) {
         return [a, b, c];
     }

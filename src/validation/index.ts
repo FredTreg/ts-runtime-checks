@@ -249,9 +249,23 @@ export function validateType(t: ts.Type, target: ts.Expression, ctx: ValidationC
                         const access = factory.createElementAccessExpression(target, genStr(prop.name));
                         ctx.addPath(target, prop.name);
                         const typeOfProp = (ctx.transformer.checker.getTypeOfSymbol(prop) || ctx.transformer.checker.getNullType()) as ts.Type;
-                        // If it's not possible for the type to be undefined
-                        if (typeOfProp === typeOfProp.getNonNullableType()) checks.push(...validate(typeOfProp, access, ctx, false));
-                        else checks.push(...validate(typeOfProp.getNonNullableType(), access, ctx, true));
+                        const nonNullableType = typeOfProp.getNonNullableType();
+                        if (typeOfProp === nonNullableType) checks.push(...validate(typeOfProp, access, ctx, false));
+                        else {
+                            // Need to differentiate between undefined and null
+                            let hasUndefinedType = hasBit(typeOfProp, TypeFlags.Undefined);
+                            let hasNullType = hasBit(typeOfProp, TypeFlags.Null);
+                            if (typeOfProp.isUnion()) {
+                                hasUndefinedType = hasUndefinedType || typeOfProp.types.some(type => hasBit(type, TypeFlags.Undefined));
+                                hasNullType = hasNullType || typeOfProp.types.some(type => hasBit(type, TypeFlags.Null));
+                            }
+                            let typeToValidate = nonNullableType;
+                            if (hasNullType) {
+                                //@ts-expect-error Internal APIs
+                                typeToValidate = ctx.transformer.checker.getUnionType([typeToValidate, ctx.transformer.checker.getNullType()]);
+                            }
+                            checks.push(...validate(typeToValidate, access, ctx, hasUndefinedType));
+                        }
                         ctx.removePath();  
                     }
                     return checks;

@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs";
 import readline from "readline";
 import { diffLines } from "diff";
+import { EOL } from "os";
 
 const rl = readline.createInterface(process.stdin, process.stdout);
 
@@ -27,11 +28,11 @@ if (!fs.existsSync(artifactsPath)) fs.mkdirSync(artifactsPath);
     const wrongful: Array<string> = [];
     for (const [fileName, dirName, passedDirs] of eachFile(integrated, "")) {
         const newFilePath = path.join(dirName, fileName);
-        const newFile = fs.readFileSync(path.join(dirName, fileName), "utf-8");
+        const newFile = normalizeEOL(fs.readFileSync(path.join(dirName, fileName), "utf-8"));
         const targetFilePath = path.join(artifactsPath, passedDirs.replace("/", "_") + fileName);
         if (!fs.existsSync(targetFilePath)) fs.writeFileSync(targetFilePath, newFile);
         else {
-            const oldFile = fs.readFileSync(targetFilePath, "utf-8");
+            const oldFile = normalizeEOL(fs.readFileSync(targetFilePath, "utf-8"));
             if (oldFile === newFile) continue;
             const diffs = diffLines(oldFile, newFile);
     
@@ -80,4 +81,9 @@ async function askYesOrNo(q: string) : Promise<boolean> {
         if (answer === "y") return true;
         else if (answer === "n") return false;
     }
+}
+
+function normalizeEOL(input: string): string {
+    const lines = input.split(/\r\n|\r|\n/);
+    return lines.join(EOL);
 }
