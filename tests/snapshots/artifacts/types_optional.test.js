@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const utils_1 = require("../../utils");
 const chai_1 = require("chai");
-describe("Optional / nullable parameters", () => {
+describe("Optional parameters", () => {
     function test(c, a, b) {
         if (typeof c !== "number")
             throw new Error("Expected c to be number.");
